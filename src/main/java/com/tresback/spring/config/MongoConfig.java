@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * @author rbailey
  */
 @Configuration
-@EnableMongoRepositories("com.tresback.mongos")
+@EnableMongoRepositories("com.tresback.repos")
 public class MongoConfig extends AbstractMongoConfiguration {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
