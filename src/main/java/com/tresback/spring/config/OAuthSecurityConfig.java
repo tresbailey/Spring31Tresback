@@ -4,8 +4,7 @@
  */
 package com.tresback.spring.config;
 
-import com.tresback.oauth.GSConsumerDetailsService;
-import com.tresback.oauth.GSProtectedResourceProcessingFilter;
+import com.tresback.oauth.TBConsumerDetailsService;
 import com.tresback.spring.filters.CORSAwareFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +29,8 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.oauth.provider.OAuthProcessingFilterEntryPoint;
 import org.springframework.security.oauth.provider.filter.CoreOAuthProviderSupport;
-import org.springframework.security.oauth.provider.filter.UserAuthorizationProcessingFilter;
+import org.springframework.security.oauth.provider.filter.OAuthProviderProcessingFilter;
+import org.springframework.security.oauth.provider.filter.ProtectedResourceProcessingFilter;
 import org.springframework.security.oauth.provider.token.InMemorySelfCleaningProviderTokenServices;
 import org.springframework.security.oauth.provider.token.OAuthProviderTokenServices;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -44,8 +44,8 @@ import org.springframework.security.web.access.expression.ExpressionBasedFilterI
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.util.AntPathRequestMatcher;
-import org.springframework.security.web.util.RegexRequestMatcher;
 import org.springframework.security.web.util.RequestMatcher;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 /**
  *
@@ -61,12 +61,22 @@ public class OAuthSecurityConfig {
     List filterChains() {
         List filterChains = new ArrayList();
         List simpleFilters = new ArrayList();
+        
         CORSAwareFilter corsFilter = new CORSAwareFilter();
         simpleFilters.add(corsFilter);
-        UserAuthorizationProcessingFilter userAuthFilter = new UserAuthorizationProcessingFilter();
-        userAuthFilter.setAuthenticationManager(authMgr());
+        
+        // Registers the entrypoint for OAuth
         simpleFilters.add(exceptionTranslationFilter());
+
+        // Ensures all requests are properly UTF-8 encoded
+        simpleFilters.add(encodingFilter());
+
+        // Actually does the OAuth work, generates a Spring Security token if success
+        simpleFilters.add(oauthFilter());
+        
+        // Checks for the existence of a security token and verifies for specific endpoints
         simpleFilters.add(filterSecurityInterceptor());
+
         SecurityFilterChain simpleChainGET = new DefaultSecurityFilterChain(new AntPathRequestMatcher("/**", HttpMethod.GET), simpleFilters);
         filterChains.add(simpleChainGET);
         SecurityFilterChain simpleChainPUT = new DefaultSecurityFilterChain(new AntPathRequestMatcher("/**", HttpMethod.PUT), simpleFilters);
@@ -145,8 +155,16 @@ public class OAuthSecurityConfig {
     }
 
     @Bean
-    public GSProtectedResourceProcessingFilter oauthFilter() {
-        return new GSProtectedResourceProcessingFilter();
+    public OAuthProviderProcessingFilter oauthFilter() {
+        return new ProtectedResourceProcessingFilter();
+    }
+    
+    @Bean
+    public CharacterEncodingFilter encodingFilter() {
+        CharacterEncodingFilter filt = new CharacterEncodingFilter();
+        filt.setEncoding("UTF-8");
+        filt.setForceEncoding(true);
+        return filt;
     }
 
     @Bean
@@ -157,7 +175,7 @@ public class OAuthSecurityConfig {
     }
 
     @Bean
-    public GSConsumerDetailsService customConsumerDetails() {
-        return new GSConsumerDetailsService();
+    public TBConsumerDetailsService customConsumerDetails() {
+        return new TBConsumerDetailsService();
     }
 }

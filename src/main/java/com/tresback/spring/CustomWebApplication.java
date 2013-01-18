@@ -31,7 +31,7 @@ public class CustomWebApplication implements WebApplicationInitializer {
         servletContext.setInitParameter("contextInitializerClasses", "com.tresback.spring.SpringContextProfileInit");
         AnnotationConfigWebApplicationContext mvcContext = new AnnotationConfigWebApplicationContext();
         AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-        log.debug("Registering the GS Config class");
+        log.debug("Registering the Config class");
         mvcContext.scan("com.tresback.spring");
         dispatcherContext.scan("com.tresback.spring");
         log.debug("Done");

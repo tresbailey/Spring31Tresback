@@ -2,6 +2,8 @@ package com.tresback.spring.config;
 
 import java.util.Set;
 import com.mongodb.Mongo;
+import com.tresback.converters.TBBeanToMongoConverter;
+import com.tresback.converters.MongoToTBBeanConverter;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -24,7 +26,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
  * @author rbailey
  */
 @Configuration
-@EnableMongoRepositories("com.tresback.repos")
+@EnableMongoRepositories(value="com.tresback.repos", 
+        basePackages={"com.tresback.repos", "com.invoker.repository", "com.invoker.modifier"})
 public class MongoConfig extends AbstractMongoConfiguration {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -61,8 +64,11 @@ public class MongoConfig extends AbstractMongoConfiguration {
 
     private void loadCustomConversions() {
         // Instantiate the various converter beans we want to use for MongoDB.
-        // Must be setup before runtime, not configurable?
         List converters = new ArrayList();
+        TBBeanToMongoConverter gsbtmc = new TBBeanToMongoConverter();
+        converters.add(gsbtmc);
+        MongoToTBBeanConverter mtgsbc = new MongoToTBBeanConverter();
+        converters.add(mtgsbc);
         allConversions = new CustomConversions(converters);
     }
 
