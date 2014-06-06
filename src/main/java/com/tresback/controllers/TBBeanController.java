@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * Beans that can be reset use different DI'ed objects
  * @author rbailey
  */
 @Controller
